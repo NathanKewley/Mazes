@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Maze Algorythms
+    </title>
+  </head>
+  <body>
+    <!-- Basic Info -->
+    <h2>Generating Mazes</h2>
+    <p id="mazeSeed">Seed used for mazes generated: </p>
+    <button onclick="createMazes()">Regenerate Mazes</button><br>
+
+    <!-- Cavases for each maze that will be generated -->
+    <h3>Recurisve Backtrack</h3>
+    <canvas id="RBCanvas" width="250" height="250"></canvas><br>
+    <h3>Prims</h3>
+    <canvas id="primsCanvas" width="250" height="250"></canvas><br>
+
+    <!-- load common js file -->
+    <script defer src="js/common.js"></script>
+
+    <!-- Load js files for each maze that will be generated -->
+    <script defer src="js/RBGenerate.js"></script>
+    <script defer src="js/primsGenerate.js"></script>
+  </body>
+</html>

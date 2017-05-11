@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <!-- create a canvas to show sprites on -->
+  <h3>Full Example using Prims</h3>
+  <p id="mazeSeed">Maze Seed: </p>
+  <canvas id="canvas" width="400" height="400"></canvas><br>
+  <button onclick="runPrims()">Regenerate</button>
+<script>
+
+//get the canvas that we will draw to and prepare drawing
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+//create globals for maze parameters
+var height = 20;
+var width = 20;
+var size = 20;
+var run = 1;
+var x = 0;
+var y = 0;
+var nodes = new Array();
+
+//create 2d maze array [10][10]
+var maze = new Array(width);for(var i=0;i< width;i++) {maze[i]=new Array(height);}
+
+var seed = 0;
+Math.randomSeed = function(max, min) {
+    seed = (seed * 9301 + 49297) % 233280;
+    var rnd = seed / 233280;
+    return min + rnd * (max - min);
+}
+
+//setup our maze array
+function clearMaze(){
+  for(var i=0;i<width;i++){
+      for(var ii=0;ii<height;ii++){
+          maze[i][ii] = new Object();
+          maze[i][ii].north = 1;
+          maze[i][ii].south = 1;
+          maze[i][ii].east = 1;
+          maze[i][ii].west = 1;
+          maze[i][ii].visited = 0;
+          maze[i][ii].mark = 0;
+      }
+  }
+}
+
+//gameloop loop
+function mainLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //if there are still marked nodes select one at random
+  if(nodes.length > 0){
+    //select random marked node and re-run with selected node
+    console.log("mazing");
+    var node = parseInt(Math.randomSeed(0,nodes.length));
+    var node = nodes[node];
+    primsGenerate(node.x,node.y);
+  }
+  drawMaze();
+}
+
+//solve the maze
+function runPrims(){
+  seed = Math.floor(Math.random() * (89898989898989898989 - 29898989898989898989 + 1)) + 29898989898989898989;
+  document.getElementById("mazeSeed").innerHTML = "Maze seed: " + seed;
+  clearMaze();
+  primsGenerate(0,0);
+  setInterval(mainLoop, 5);
+}
+
+//stoled function to shuffle an array
+function shuffle(arra1) {
+    var ctr = arra1.length, temp, index;
+    while (ctr > 0) {
+        index = parseInt(Math.randomSeed(0,ctr));
+        ctr--;
+        temp = arra1[ctr];
+        arra1[ctr] = arra1[index];
+        arra1[index] = temp;
+    }
+    return arra1;
+}
+
+//function to solve the maze
+function primsGenerate(x,y){
+  //set current node to visited and no longer marked
+  maze[x][y].visited = 1;
+  maze[x][y].mark = 0;
+  var l=0,r=0,u=0,d=0;
+
+  //mark all adjasent nodes that have not been visited
+  if(x > 0){if(maze[x-1][y].visited == 0){maze[x-1][y].mark = 1;}else{l=1;}}
+  if(x < width-1){if(maze[x+1][y].visited == 0){maze[x+1][y].mark = 1;}else{r=1;}}
+  if(y > 0){if(maze[x][y-1].visited == 0){maze[x][y-1].mark = 1;}else{u=1;}}
+  if(y < height-1){if(maze[x][y+1].visited == 0){maze[x][y+1].mark = 1;}else{d=1;}}
+
+  //expand the maze in a random direciton that is avaliable
+  var dirOrder = [0,1,2,3];
+  dirOrder = shuffle(dirOrder);
+  var expanded = 0;
+
+  for(var i=0; i<4; i++){
+    if((l==1) && (expanded == 0) && (dirOrder[i] == 0)){
+      maze[x][y].west = 0;
+      maze[x-1][y].east = 0;
+      expanded = 1;
+    }
+    if((r==1) && (expanded == 0) && (dirOrder[i] == 1)){
+      maze[x][y].east = 0;
+      maze[x+1][y].west = 0;
+      expanded = 1;
+    }
+    if((u==1) && (expanded == 0) && (dirOrder[i] == 2)){
+      maze[x][y].north = 0;
+      maze[x][y-1].south = 0;
+      expanded = 1;
+    }
+    if((d==1) && (expanded == 0) && (dirOrder[i] == 3)){
+      maze[x][y].south = 0;
+      maze[x][y+1].north = 0;
+      expanded = 1;
+    }
+  }
+
+  //pick a random marked node [how to do this well?]
+  //temp array to hold all the marked nodes
+  //nodes = new Array();
+  nodes = [];
+
+  //find all marked nodes
+  for(var i=0;i<width;i++){
+      for(var ii=0;ii<height;ii++){
+        if(maze[i][ii].mark == 1){
+          nodes.push({x:i,y:ii});
+        }
+      }
+  }
+}
+
+//draw the maze
+function drawMaze(){
+  for(var i=0;i<width;i++){
+      for(var ii=0;ii<height;ii++){
+          if(maze[i][ii].mark == 1){ctx.fillStyle="#FF0000";}else{ctx.fillStyle="#000000";}
+          if(maze[i][ii].north == 1){ctx.fillRect(i*size,ii*size,size,1);}
+          if(maze[i][ii].south == 1){ctx.fillRect(i*size,ii*size+size-1,size,1);}
+          if(maze[i][ii].east == 1){ctx.fillRect(i*size+size-1,ii*size,1,size);}
+          if(maze[i][ii].west == 1){ctx.fillRect(i*size,ii*size,1,size);}
+      }
+  }
+  console.log("Maze drawn");
+}
+
+//setup an initial maze
+runPrims();
+
+</script>
+</body>
+</html>

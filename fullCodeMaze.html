@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <!-- create a canvas to show sprites on -->
+  <h3>Full Example using Recursive Backtracking</h3>
+  <p id="mazeSeed">Maze Seed: </p>
+  <canvas id="canvas" width="400" height="400"></canvas><br>
+  <button onclick="runRecursiveBacktrack()">Regenerate</button>
+<script>
+
+//get the canvas that we will draw to and prepare drawing
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+//create globals for maze parameters
+var height = 20;
+var width = 20;
+var size = 20;
+
+//create 2d maze array [10][10]
+var maze = new Array(width);for(var i=0;i< width;i++) {maze[i]=new Array(height);}
+
+var seed = 0;
+Math.randomSeed = function(max, min) {
+    seed = (seed * 9301 + 49297) % 233280;
+    var rnd = seed / 233280;
+    return min + rnd * (max - min);
+}
+
+//setup our maze array
+function clearMaze(){
+  for(var i=0;i<width;i++){
+      for(var ii=0;ii<height;ii++){
+          maze[i][ii] = new Object();
+          maze[i][ii].north = 1;
+          maze[i][ii].south = 1;
+          maze[i][ii].east = 1;
+          maze[i][ii].west = 1;
+          maze[i][ii].visited = 0;
+      }
+  }
+}
+
+//stoled function to shuffle an array
+function shuffle(arra1) {
+    var ctr = arra1.length, temp, index;
+    while (ctr > 0) {
+        index = parseInt(Math.randomSeed(0,ctr));
+        ctr--;
+        temp = arra1[ctr];
+        arra1[ctr] = arra1[index];
+        arra1[index] = temp;
+    }
+    return arra1;
+}
+
+//function to solve the maze
+function recursiveBacktrack(x,y){
+    //create random order to visit nodes
+    var dir = [0,1,2,3];
+    dir = shuffle(dir);
+
+    //for each direction
+    for(var i=0;i<4;i++){
+        var newX = x;
+        var newY = y;
+        if(dir[i] == 0){newY -= 1;}
+        if(dir[i] == 1){newY += 1;}
+        if(dir[i] == 2){newX -= 1;}
+        if(dir[i] == 3){newX += 1;}
+
+        //if not a dead end
+        if((newX >= 0) && (newX < width) && (newY >= 0) && (newY < height) && (maze[newX][newY].visited == 0)){
+            //mark tile as visited
+            maze[newX][newY].visited = 1;
+            maze[x][y].visited = 1;
+
+            //destroy walls
+            switch(dir[i]){
+              case 0:
+                maze[x][y].north = 0;
+                maze[newX][newY].south = 0;
+                break;
+              case 1:
+                  maze[x][y].south = 0;
+                  maze[newX][newY].north = 0;
+                break;
+              case 2:
+                maze[x][y].west = 0;
+                maze[newX][newY].east = 0;
+                break;
+              case 3:
+                maze[x][y].east = 0;
+                maze[newX][newY].west = 0;
+                break;
+            }
+
+            //recursive step
+            recursiveBacktrack(newX, newY);
+        }
+    }
+}
+
+//solve the maze
+function runRecursiveBacktrack(){
+  seed = Math.floor(Math.random() * (89898989898989898989 - 29898989898989898989 + 1)) + 29898989898989898989;
+  document.getElementById("mazeSeed").innerHTML = "Maze seed: " + seed;
+  clearMaze();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  recursiveBacktrack(0,0);
+  drawMaze();
+}
+
+//button click to solve maze
+
+//draw the maze
+function drawMaze(){
+  for(var i=0;i<width;i++){
+      for(var ii=0;ii<height;ii++){
+          if(maze[i][ii].north == 1){ctx.fillRect(i*size,ii*size,size,1);}
+          if(maze[i][ii].south == 1){ctx.fillRect(i*size,ii*size+size-1,size,1);}
+          if(maze[i][ii].east == 1){ctx.fillRect(i*size+size-1,ii*size,1,size);}
+          if(maze[i][ii].west == 1){ctx.fillRect(i*size,ii*size,1,size);}
+      }
+  }
+}
+
+//setup an initial maze
+runRecursiveBacktrack();
+
+</script>
+</body>
+</html>
